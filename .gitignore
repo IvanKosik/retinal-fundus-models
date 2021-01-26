@@ -1,7 +1,10 @@
 /data/images
+/data/masks
 /databases
 /output
 /temp
+
+to-do.txt
 
 .idea
 
