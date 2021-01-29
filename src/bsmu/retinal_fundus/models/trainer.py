@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Type
 
 import keras
@@ -131,47 +132,66 @@ class ModelTrainer:
         debug_utils.print_title(self._print_layers_info.__name__)
         debug_utils.print_layers_info(self.model)
 
-    def verify_generator(self, generator, number_of_batches: int = 7):
+    def verify_generator(self, generator, batch_qty: int = 7):
         debug_utils.print_title(self.verify_generator.__name__)
 
         generator_len = len(generator)
         print('generator_len (number of batches per epoch):', generator_len)
 
-        for batch_index in range(min(number_of_batches, generator_len)):
+        for batch_index in range(min(batch_qty, generator_len)):
             batch = generator.__getitem__(batch_index)
             self.verify_batch(batch, str(batch_index))
 
     def verify_batch(self, batch, batch_prefix: str):
-        batch_input, batch_ages = batch
-        batch_predictions = None
-        batch_images = None
-        if self.combined_model:
-            batch_males, batch_predictions = batch_input[0], batch_input[1]
-        else:
-            batch_images, batch_males = batch_input[0], batch_input[1]
+        batch_images, batch_masks = batch
 
-        if batch_images is not None:
-            debug_utils.print_info(batch_images, 'batch_images')
-        debug_utils.print_info(batch_males, 'batch_males')
-        debug_utils.print_info(batch_ages, 'batch_ages')
-        if batch_predictions is not None:
-            debug_utils.print_info(batch_predictions, 'batch_predictions')
+        debug_utils.print_info(batch_images, 'batch_images')
+        debug_utils.print_info(batch_masks, 'batch_masks')
 
-        # Save all batch images
-        for batch_sample_index in range(len(batch_males)):
-            if batch_images is not None:
-                image = batch_images[batch_sample_index]       #### [...]
-                debug_utils.print_info(image, '\nimage')
-                image = image_utils.normalized_image(image)
-                skimage.io.imsave(str(self.config.test_generator_dir() / f'{batch_prefix}_{batch_sample_index}.png'), image)
+        # Save all batch images, masks
+        for batch_sample_index in range(len(batch_images)):
+            image = batch_images[batch_sample_index]
+            mask = batch_masks[batch_sample_index]
 
-            male = batch_males[batch_sample_index][0]
-            age = batch_ages[batch_sample_index][0]
+            debug_utils.print_info(image, '\nimage')
+            debug_utils.print_info(mask, '\nmask')
 
-            print('male:', male)
-            print('age:', age)
-            if batch_predictions is not None:
-                print('predictions:', batch_predictions[batch_sample_index])
+            image = image_utils.normalized_image(image)
+            name = f'{batch_prefix}_{batch_sample_index}.png'
+            skimage.io.imsave(str(self.config.test_generator_dir() / 'images' / name), image)
+
+            skimage.io.imsave(str(self.config.test_generator_dir() / 'masks' / name), mask)
+
+    def predict_using_generator(self, generator, batch_qty: int = 2):
+        debug_utils.print_title(self.predict_using_generator.__name__)
+
+        self.load_model()
+
+        generator_len = len(generator)
+        for batch_index in range(min(batch_qty, generator_len)):
+            batch = generator.__getitem__(batch_index)
+            self.predict_batch(batch, str(batch_index))
+
+    def predict_batch(self, batch, batch_prefix: str):
+        batch_images, _ = batch
+        batch_predicted_masks = self.model.predict(batch_images)
+
+        predictions_dir = self.config.predicts_dir() / Path(self.model_name).stem / 'predicted_masks'
+        predictions_dir.mkdir(parents=True, exist_ok=True)
+
+        # Save all batch images, masks
+        for batch_sample_index in range(len(batch_images)):
+            image = batch_images[batch_sample_index]
+            predicted_mask = batch_predicted_masks[batch_sample_index]
+
+            debug_utils.print_info(image, '\nimage')
+            debug_utils.print_info(predicted_mask, '\npredicted_mask')
+
+            #% image = image_utils.normalized_image(image)
+            name = f'{batch_prefix}_{batch_sample_index}.png'
+            #% skimage.io.imsave(str(self.config.test_generator_dir() / 'images' / name), image)
+
+            skimage.io.imsave(str(predictions_dir / name), predicted_mask)
 
     def create_batch_from_one_sample(self, image, male: bool):
         assert len(image.shape) == 2, 'one channel images are only supported'

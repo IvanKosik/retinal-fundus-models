@@ -19,8 +19,11 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     BATCH_SIZE = 8
     MODEL_INPUT_IMAGE_SIZE = (352, 352)
 
+    LR = 1.3e-3
+    EPOCHS = 600
+
     MODEL_NAME_PREFIX = 'DenseNet201'
-    MODEL_NAME_POSTFIX = 'Test1'
+    MODEL_NAME_POSTFIX = 'Test5_LrBig'
 
     AUGMENTATION_TRANSFORMS = albumentations.Compose([
         # albumentations.ShiftScaleRotate(

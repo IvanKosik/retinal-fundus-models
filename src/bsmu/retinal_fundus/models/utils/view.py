@@ -11,10 +11,10 @@ class ImageMaskView:
         self.show_mask = True
 
         self.fig = plt.figure()
-        self.plot1 = plt.subplot(1, 2, 1)
-        self.plot2 = plt.subplot(1, 2, 2)
+        self.plot1 = self.fig.add_subplot(1, 2, 1)
+        self.plot2 = self.fig.add_subplot(1, 2, 2)
 
-        button_axes = plt.axes([0.7, 0.05, 0.2, 0.075])
+        button_axes = self.fig.add_axes([0.7, 0.05, 0.2, 0.075])
         self.button = Button(button_axes, 'Show/Hide Mask')
         self.button.on_clicked(self.show_hide_mask)
 

@@ -57,6 +57,10 @@ class ModelTrainerConfig:
         return cls.OUTPUT_DIR / 'logs'
 
     @classmethod
+    def predicts_dir(cls):
+        return cls.OUTPUT_DIR / 'predicts'
+
+    @classmethod
     def test_generator_dir(cls):
         return cls.OUTPUT_DIR / 'test_generator'
 

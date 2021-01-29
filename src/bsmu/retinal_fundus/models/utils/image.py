@@ -77,5 +77,8 @@ def start_end_nonzero_indexes(mask):
 
 def convert_images_to_png(src_image_dir: Path, dst_image_dir: Path):
     for image_path in src_image_dir.iterdir():
+        if image_path.is_dir():
+            continue
+
         image = skimage.io.imread(str(image_path))
         skimage.io.imsave(str(dst_image_dir / f'{image_path.stem}.png'), image)
