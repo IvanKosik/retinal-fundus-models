@@ -41,6 +41,14 @@ class ModelTrainerConfig:
         return (cls.BATCH_SIZE, *cls.model_input_image_shape())
 
     @classmethod
+    def mask_shape(cls):
+        return (*cls.MODEL_INPUT_IMAGE_SIZE, cls.CLASSES_QTY)
+
+    @classmethod
+    def mask_batch_shape(cls):
+        return (cls.BATCH_SIZE, *cls.mask_shape())
+
+    @classmethod
     def image_dir(cls):
         return cls.DATA_DIR / 'images'
 

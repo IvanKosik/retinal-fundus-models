@@ -26,7 +26,8 @@ class DataGenerator(keras.utils.Sequence):
 
         self.images = np.empty(
             shape=(self.sample_qty, *self.config.model_input_image_shape()), dtype=np.float32)
-        self.masks = np.empty_like(self.images)
+        self.masks = np.empty(
+            shape=(self.sample_qty, *self.config.mask_shape()), dtype=np.float32)
 
         for index, data_row in enumerate(data):
             image_id = data_row[0]
@@ -42,7 +43,7 @@ class DataGenerator(keras.utils.Sequence):
             mask_path = self.config.mask_dir() / image_id
             mask = skimage.io.imread(str(mask_path))
             mask = skimage.transform.resize(
-                mask, self.config.model_input_image_shape(), order=3, anti_aliasing=True)  # preserve_range=True)
+                mask, self.config.mask_shape(), order=3, anti_aliasing=True)  # preserve_range=True)
             mask = image_utils.normalized_image(mask).astype(np.float32)
             self.masks[index] = mask
 
@@ -60,7 +61,7 @@ class DataGenerator(keras.utils.Sequence):
     def __getitem__(self, batch_index):
         """Generate one batch of data"""
         batch_images = np.zeros(shape=self.config.model_input_batch_shape(), dtype=np.float32)
-        batch_masks = np.zeros_like(batch_images)
+        batch_masks = np.zeros(shape=self.config.mask_batch_shape(), dtype=np.float32)
 
         # Generate image indexes of the batch
         batch_sample_indexes = self.sample_indexes[batch_index * self.config.BATCH_SIZE:

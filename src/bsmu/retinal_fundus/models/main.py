@@ -16,14 +16,22 @@ def main():
     # view.show()
     # exit()
 
+    # image = skimage.io.imread(str(r'C:\MyDiskBackup\Projects\retinal-fundus-models\data\images\chasedb1_01_l.png'))
+    # mask = skimage.io.imread(str(r'C:\MyDiskBackup\Projects\retinal-fundus-models\data\masks\chasedb1_01_l.png'))
+    # debug_utils.print_info(image, 'image')
+    # debug_utils.print_info(mask, 'mask')
+    # view = view_utils.ImageMaskGridView([image] * 4, [mask] * 4, 0.5)
+    # view.show()
+    # exit()
+
 
     print('Run, retinal-fundus-models, run!')
 
     model_trainer = trainer.UnetModelTrainer()
 
-    model_trainer.predict_using_generator(model_trainer.test_generator, 1)
+    # model_trainer.predict_using_generator(model_trainer.test_generator, 1)
 
-    # model_trainer.verify_generator(model_trainer.train_generator)
+    model_trainer.verify_generator(model_trainer.train_generator, show=True)
 
     # csv_utils.generate_train_valid_csv(
     #     model_trainer.config.image_dir(), model_trainer.config.mask_dir(),

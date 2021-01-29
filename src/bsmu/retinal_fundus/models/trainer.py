@@ -8,6 +8,7 @@ import skimage.io
 from keras import optimizers
 from segmentation_models import losses as sm_losses
 from segmentation_models import metrics as sm_metrics
+from bsmu.retinal_fundus.models.utils import view as view_utils
 
 from bsmu.retinal_fundus.models.config import ModelTrainerConfig
 from bsmu.retinal_fundus.models.utils import image as image_utils, train as train_utils, debug as debug_utils
@@ -132,7 +133,7 @@ class ModelTrainer:
         debug_utils.print_title(self._print_layers_info.__name__)
         debug_utils.print_layers_info(self.model)
 
-    def verify_generator(self, generator, batch_qty: int = 7):
+    def verify_generator(self, generator, show: bool = True, save_to_disk: bool = False, batch_qty: int = 7):
         debug_utils.print_title(self.verify_generator.__name__)
 
         generator_len = len(generator)
@@ -140,13 +141,15 @@ class ModelTrainer:
 
         for batch_index in range(min(batch_qty, generator_len)):
             batch = generator.__getitem__(batch_index)
-            self.verify_batch(batch, str(batch_index))
+            self.verify_batch(batch, str(batch_index), show, save_to_disk)
 
-    def verify_batch(self, batch, batch_prefix: str):
+    def verify_batch(self, batch, batch_prefix: str, show: bool = True, save_to_disk: bool = False):
         batch_images, batch_masks = batch
 
         debug_utils.print_info(batch_images, 'batch_images')
         debug_utils.print_info(batch_masks, 'batch_masks')
+
+        normalized_batch_images = []
 
         # Save all batch images, masks
         for batch_sample_index in range(len(batch_images)):
@@ -157,10 +160,17 @@ class ModelTrainer:
             debug_utils.print_info(mask, '\nmask')
 
             image = image_utils.normalized_image(image)
-            name = f'{batch_prefix}_{batch_sample_index}.png'
-            skimage.io.imsave(str(self.config.test_generator_dir() / 'images' / name), image)
+            normalized_batch_images.append(image)
 
-            skimage.io.imsave(str(self.config.test_generator_dir() / 'masks' / name), mask)
+            if save_to_disk:
+                name = f'{batch_prefix}_{batch_sample_index}.png'
+                skimage.io.imsave(str(self.config.test_generator_dir() / 'images' / name), image)
+
+                skimage.io.imsave(str(self.config.test_generator_dir() / 'masks' / name), mask)
+
+        if show:
+            view = view_utils.ImageMaskGridView(normalized_batch_images, batch_masks[..., 0], mask_alpha=0.5)
+            view.show()
 
     def predict_using_generator(self, generator, batch_qty: int = 2):
         debug_utils.print_title(self.predict_using_generator.__name__)
