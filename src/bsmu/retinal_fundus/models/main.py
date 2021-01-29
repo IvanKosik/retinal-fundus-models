@@ -31,13 +31,13 @@ def main():
 
     # model_trainer.predict_using_generator(model_trainer.test_generator, 1)
 
-    model_trainer.verify_generator(model_trainer.train_generator, show=True)
+    # model_trainer.verify_generator(model_trainer.train_generator, show=True)
 
     # csv_utils.generate_train_valid_csv(
     #     model_trainer.config.image_dir(), model_trainer.config.mask_dir(),
     #     model_trainer.config.train_data_csv_path(), model_trainer.config.valid_data_csv_path())
 
-    # model_trainer.run()
+    model_trainer.run()
 
 
 if __name__ == '__main__':

@@ -23,7 +23,7 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     EPOCHS = 600
 
     MODEL_NAME_PREFIX = 'DenseNet201'
-    MODEL_NAME_POSTFIX = 'Test5_LrBig'
+    MODEL_NAME_POSTFIX = 'Test09_CondaLibsUpdated'
 
     AUGMENTATION_TRANSFORMS = albumentations.Compose([
         # albumentations.ShiftScaleRotate(
