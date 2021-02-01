@@ -3,15 +3,15 @@ from typing import Type
 
 import keras
 import numpy as np
-import pandas as pd
 import skimage.io
+import skimage.transform
 from keras import optimizers
 from segmentation_models import losses as sm_losses
 from segmentation_models import metrics as sm_metrics
-from bsmu.retinal_fundus.models.utils import view as view_utils
 
 from bsmu.retinal_fundus.models.config import ModelTrainerConfig
 from bsmu.retinal_fundus.models.utils import image as image_utils, train as train_utils, debug as debug_utils
+from bsmu.retinal_fundus.models.utils import view as view_utils
 
 
 class ModelTrainer:
@@ -203,75 +203,40 @@ class ModelTrainer:
 
             skimage.io.imsave(str(predictions_dir / name), predicted_mask)
 
-    def create_batch_from_one_sample(self, image, male: bool):
-        assert len(image.shape) == 2, 'one channel images are only supported'
-        assert image.shape == self.model_input_image_size, 'image size is not equal to model input size'
+    def save_predictions(self, mask_batch, prefix: str):
+        predictions_dir = self.config.predicts_dir() / Path(self.model_name).stem / 'predicted_masks'
+        predictions_dir.mkdir(parents=True, exist_ok=True)
 
-        # Create a batch from one image
-        batch_images = np.zeros(shape=(self.BATCH_SIZE, *self.MODEL_INPUT_IMAGE_SHAPE), dtype=np.float32)
-        batch_males = np.zeros(shape=(self.BATCH_SIZE, 1), dtype=np.uint8)
+        for index, mask in enumerate(mask_batch):
+            debug_utils.print_info(mask, '\npredicted_mask')
 
-        image = image_utils.normalized_image(image)
-        image = image * 255
-        image = np.stack((image,) * self.model_input_image_channels_count, axis=-1)
-        batch_images[0, ...] = image
+            name = f'{prefix}_{index}.png'
+            skimage.io.imsave(str(predictions_dir / name), mask)
 
-        batch_males[0, 0] = male
+    def predict_on_images(self, images: list, save: bool = True, prefix: str = 'predict_on_images'):
+        debug_utils.print_title(self.predict_on_images.__name__)
 
-        batch_images = self.preprocess_batch_images(batch_images)
+        self.load_model()
 
-        input_batch = [batch_images, batch_males]
-        return input_batch
+        image_batch = self.create_batch_from_images(images)
+        predicted_mask_batch = self.model.predict(image_batch)
+        if save:
+            self.save_predictions(predicted_mask_batch, prefix)
+        return predicted_mask_batch
 
-    def generate_image_cam(self, image, male: bool):
-        input_batch = self.create_batch_from_one_sample(image, male)
-        cam_batch, output_age_batch, image_cam_overlay_batch = self.generate_cam_batch(input_batch)
-        return cam_batch[0], train_utils.denormalized_age(output_age_batch[0][0]), \
-            None if image_cam_overlay_batch is None else image_cam_overlay_batch[0]
+    def create_batch_from_images(self, images: list):
+        image_batch = np.empty(shape=(len(images), *self.config.model_input_image_shape()), dtype=np.float32)
 
-    def generate_cam_batch(self, input_batch):
-        assert self.INPUT_IMAGE_LAYER_NAME and self.INPUT_MALE_LAYER_NAME \
-               and self.OUTPUT_AGE_LAYER_NAME and self.OUTPUT_CONV_LAYER_NAME and self.OUTPUT_POOLING_LAYER_NAME, \
-               'define all needed layer names to generate activation map'
-        return cam_utils.generate_cam_batch(
-            input_batch, self.model, self.INPUT_IMAGE_LAYER_NAME, self.INPUT_MALE_LAYER_NAME,
-            self.OUTPUT_AGE_LAYER_NAME, self.OUTPUT_CONV_LAYER_NAME, self.OUTPUT_POOLING_LAYER_NAME,
-            self.OUTPUT_IMAGE_CAM_OVERLAY_LAYER_NAME)
+        for image_index, image in enumerate(images):
+            image = skimage.transform.resize(image, self.config.model_input_image_shape(), order=3, anti_aliasing=True)
+            image = image_utils.normalized_image(image)
+            image = image * 255
+            image_batch[image_index, ...] = image
 
-    def generate_image_cam_overlay(self, image, male: bool, cam_threshold):
-        cam, age, image_cam_overlay = self.generate_image_cam(image, male)
-        overlay_result = cam_utils.overlay_cam(
-            image if image_cam_overlay is None else image_cam_overlay, cam, cam_threshold)
-        return overlay_result, age
+        if self.config.PREPROCESS_BATCH_IMAGES is not None:
+            image_batch = self.config.PREPROCESS_BATCH_IMAGES(image_batch)
 
-    def crop_image_to_cam(self, image_src, image, male: bool, threshold):
-        cam, age, image_cam_overlay = self.generate_image_cam(image, male)
-        return image_utils.crop_important_image_region(image_src, cam, threshold)
-
-    def data_frame_with_predictions(self, csv_path):
-        csv_data = pd.read_csv(str(csv_path))
-        data = csv_data.to_numpy()
-
-        predictions = self.csv_predictions(csv_path)
-
-        data_with_predictions = np.hstack((data, predictions))
-        column_labels = np.append(csv_data.columns, self.model_name)
-        return pd.DataFrame(data=data_with_predictions, columns=column_labels)
-
-    def csv_predictions(self, csv_path):
-        generator = train_utils.DataGenerator(
-            self.IMAGE_DIR, csv_path, self.BATCH_SIZE, self.MODEL_INPUT_IMAGE_SHAPE,
-            shuffle=False, preprocess_batch_images=self.preprocess_batch_images,
-            augmentation_transforms=None, apply_age_normalization=self.apply_age_nomalization,
-            combined_model=self.combined_model, discard_last_incomplete_batch=False)
-
-        predictions = self.model.predict_generator(generator=generator)
-        # Remove last rows (predictions for black images, which can be,
-        # if the number of images is not a multiple of the batch size)
-        predictions = predictions[:generator.sample_qty]
-        if self.apply_age_nomalization:
-            predictions = train_utils.denormalized_age(predictions)
-        return predictions
+        return image_batch
 
     def test_model(self):
         ...

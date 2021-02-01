@@ -6,6 +6,7 @@ from bsmu.retinal_fundus.models.unet import trainer
 # import numpy as np
 from bsmu.retinal_fundus.models.utils import view as view_utils
 from bsmu.retinal_fundus.models.utils import debug as debug_utils
+from bsmu.retinal_fundus.models.utils import image as image_utils
 import skimage.io
 
 
@@ -31,13 +32,23 @@ def main():
 
     # model_trainer.predict_using_generator(model_trainer.test_generator, 1)
 
+
+    image = skimage.io.imread(str(r'D:\Projects\retinal-fundus-models\databases\HRF_all_GoodImages\images\15_h.jpg'))
+    # model_trainer.predict_on_images(images=[image])
+    image_tiles = image_utils.split_image_into_tiles(image, (3, 3))
+    tile_masks = model_trainer.predict_on_images(images=image_tiles, save=False)
+    mask = image_utils.merge_tiles_into_image(tile_masks, (3, 3))
+
+    model_trainer.save_predictions([mask], prefix='combined_mask')
+
+
     # model_trainer.verify_generator(model_trainer.train_generator, show=True)
 
     # csv_utils.generate_train_valid_csv(
     #     model_trainer.config.image_dir(), model_trainer.config.mask_dir(),
     #     model_trainer.config.train_data_csv_path(), model_trainer.config.valid_data_csv_path())
 
-    model_trainer.run()
+    # model_trainer.run()
 
 
 if __name__ == '__main__':
