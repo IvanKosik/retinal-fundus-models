@@ -34,11 +34,10 @@ def main():
 
 
     image = skimage.io.imread(str(r'D:\Projects\retinal-fundus-models\databases\HRF_all_GoodImages\images\15_h.jpg'))
-    # model_trainer.predict_on_images(images=[image])
-    image_tiles = image_utils.split_image_into_tiles(image, (3, 3))
-    tile_masks = model_trainer.predict_on_images(images=image_tiles, save=False)
-    mask = image_utils.merge_tiles_into_image(tile_masks, (3, 3))
-
+    # model_trainer.predict_on_images(images=[image], resize_mask_to_image=True, save=True)
+    image_tiles = image_utils.split_image_into_tiles(image, (2, 2))
+    tile_masks = model_trainer.predict_on_images(images=image_tiles, resize_mask_to_image=True, save=True)
+    mask = image_utils.merge_tiles_into_image(tile_masks, (2, 2))
     model_trainer.save_predictions([mask], prefix='combined_mask')
 
 

@@ -213,16 +213,28 @@ class ModelTrainer:
             name = f'{prefix}_{index}.png'
             skimage.io.imsave(str(predictions_dir / name), mask)
 
-    def predict_on_images(self, images: list, save: bool = True, prefix: str = 'predict_on_images'):
+    def predict_on_images(
+            self, images: list, resize_mask_to_image: bool = True,
+            save: bool = True, prefix: str = 'predict_on_images'):
         debug_utils.print_title(self.predict_on_images.__name__)
 
         self.load_model()
 
         image_batch = self.create_batch_from_images(images)
-        predicted_mask_batch = self.model.predict(image_batch)
+        predicted_masks = self.model.predict(image_batch)
+
+        if resize_mask_to_image:
+            resized_masks = []
+            for index, image in enumerate(images):
+                mask = predicted_masks[index]
+                resized_mask = skimage.transform.resize(mask, image.shape[:2], order=3, anti_aliasing=True)
+                resized_masks.append(resized_mask)
+            predicted_masks = resized_masks
+
         if save:
-            self.save_predictions(predicted_mask_batch, prefix)
-        return predicted_mask_batch
+            self.save_predictions(predicted_masks, prefix)
+
+        return predicted_masks
 
     def create_batch_from_images(self, images: list):
         image_batch = np.empty(shape=(len(images), *self.config.model_input_image_shape()), dtype=np.float32)
