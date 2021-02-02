@@ -214,13 +214,14 @@ class ModelTrainer:
             skimage.io.imsave(str(predictions_dir / name), mask)
 
     def predict_on_images(
-            self, images: list, resize_mask_to_image: bool = True,
-            save: bool = True, prefix: str = 'predict_on_images'):
+            self, images: list, resize_images_to_model_input_shape: bool = True,
+            resize_mask_to_image: bool = True, save: bool = True,
+            prefix: str = 'predict_on_images'):
         debug_utils.print_title(self.predict_on_images.__name__)
 
         self.load_model()
 
-        image_batch = self.create_batch_from_images(images)
+        image_batch = self.create_batch_from_images(images, resize_images_to_model_input_shape)
         predicted_masks = self.model.predict(image_batch)
 
         if resize_mask_to_image:
@@ -236,11 +237,14 @@ class ModelTrainer:
 
         return predicted_masks
 
-    def create_batch_from_images(self, images: list):
+    def create_batch_from_images(
+            self, images: list, resize_images_to_model_input_shape: bool = True):
         image_batch = np.empty(shape=(len(images), *self.config.model_input_image_shape()), dtype=np.float32)
 
         for image_index, image in enumerate(images):
-            image = skimage.transform.resize(image, self.config.model_input_image_shape(), order=3, anti_aliasing=True)
+            if resize_images_to_model_input_shape:
+                image = skimage.transform.resize(
+                    image, self.config.model_input_image_shape(), order=3, anti_aliasing=True)
             image = image_utils.normalized_image(image)
             image = image * 255
             image_batch[image_index, ...] = image
