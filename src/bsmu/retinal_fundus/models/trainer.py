@@ -25,25 +25,25 @@ class ModelTrainer:
         self._valid_generator = None
         self._test_generator = None
 
-        self.callbacks = self._create_callbacks()
+        #%self.callbacks = self._create_callbacks()
 
     @property
     def model_name(self):
-        size = f'{self.config.MODEL_INPUT_IMAGE_SIZE[0]}x{self.config.MODEL_INPUT_IMAGE_SIZE[1]}'
-        batch_size = f'b{self.config.BATCH_SIZE}'
-        name_parts = [self.config.MODEL_NAME_PREFIX, size, batch_size, self.config.MODEL_NAME_POSTFIX]
-        name = '_'.join(filter(None, name_parts))
-        return f'{name}.h5'
+        return self.config.model_name()
 
     @property
     def model_path(self):
-        return self.config.model_dir() / self.model_name
+        return self.config.model_path()
 
     @property
     def log_path(self):
-        return self.config.log_dir() / self.model_name
+        return self.config.log_path()
 
-    def run(self):
+    @property
+    def callbacks(self):
+        return self.config.callbacks()
+
+    def run(self, find_lr: bool = False):
         if self.model_path.exists():
             self.load_model()
         else:
@@ -51,7 +51,11 @@ class ModelTrainer:
 
         self._freeze_layers()
 
-        self._train_model()
+        if find_lr:
+            self._train_model(self.config.FIND_LR_START_LR, self.config.FIND_LR_EPOCHS,
+                              self.config.find_lr_callbacks())
+        else:
+            self._train_model(self.config.LR, self.config.EPOCHS, self.callbacks)
 
     def create_model(self):
         debug_utils.print_title(self.create_model.__name__)
@@ -69,20 +73,20 @@ class ModelTrainer:
         for layer in self.model.layers:
             layer.trainable = True
 
-    def _create_callbacks(self):
-        monitored_quantity_name = 'val_' + sm_metrics.iou_score.name
-        monitored_quantity_mode = 'max'
-        checkpoint_callback = keras.callbacks.ModelCheckpoint(
-            str(self.model_path), monitor=monitored_quantity_name, verbose=1, save_best_only=True,
-            mode=monitored_quantity_mode)
-        reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(
-            monitor=monitored_quantity_name, factor=0.8, patience=6, verbose=1, mode=monitored_quantity_mode,
-            min_lr=1e-6)
-        early_stopping_callback = keras.callbacks.EarlyStopping(
-            monitor=monitored_quantity_name, patience=60, mode=monitored_quantity_mode)
-        tensorboard_callback = keras.callbacks.TensorBoard(log_dir=str(self.log_path), write_graph=False)
-
-        return [checkpoint_callback, reduce_lr_callback, early_stopping_callback, tensorboard_callback]
+    # def _create_callbacks(self):
+    #     monitored_quantity_name = 'val_' + sm_metrics.iou_score.name
+    #     monitored_quantity_mode = 'max'
+    #     checkpoint_callback = keras.callbacks.ModelCheckpoint(
+    #         str(self.model_path), monitor=monitored_quantity_name, verbose=1, save_best_only=True,
+    #         mode=monitored_quantity_mode)
+    #     reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(
+    #         monitor=monitored_quantity_name, factor=0.8, patience=6, verbose=1, mode=monitored_quantity_mode,
+    #         min_lr=1e-6)
+    #     early_stopping_callback = keras.callbacks.EarlyStopping(
+    #         monitor=monitored_quantity_name, patience=60, mode=monitored_quantity_mode)
+    #     tensorboard_callback = keras.callbacks.TensorBoard(log_dir=str(self.log_path), write_graph=False)
+    #
+    #     return [checkpoint_callback, reduce_lr_callback, early_stopping_callback, tensorboard_callback]
 
     @property
     def train_generator(self):
@@ -117,16 +121,16 @@ class ModelTrainer:
             config=self.config, data_csv_path=self.config.test_data_csv_path(), shuffle=False,
             augmentation_transforms=None)
 
-    def _train_model(self):
+    def _train_model(self, lr, epochs, callbacks):
         debug_utils.print_title(self._train_model.__name__)
 
-        self.model.compile(optimizer=optimizers.Adam(learning_rate=self.config.LR), loss=self.config.LOSS,
+        self.model.compile(optimizer=optimizers.Adam(learning_rate=lr), loss=self.config.LOSS,
                            metrics=[sm_losses.binary_crossentropy, sm_losses.JaccardLoss(per_image=True),
                                     sm_metrics.IOUScore(threshold=0.5, per_image=True)])
         self.model.fit_generator(generator=self.train_generator,
-                                 epochs=self.config.EPOCHS,
+                                 epochs=epochs,
                                  verbose=2,
-                                 callbacks=self.callbacks,
+                                 callbacks=callbacks,
                                  validation_data=self.valid_generator)
 
     def _print_layers_info(self):

@@ -74,7 +74,7 @@ def main():
     #     model_trainer.config.image_dir(), model_trainer.config.mask_dir(),
     #     model_trainer.config.train_data_csv_path(), model_trainer.config.valid_data_csv_path())
 
-    # model_trainer.run()
+    # model_trainer.run(find_lr=False)
 
 
 if __name__ == '__main__':

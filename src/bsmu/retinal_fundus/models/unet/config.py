@@ -17,13 +17,15 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     PREPROCESS_BATCH_IMAGES = densenet.preprocess_input
 
     BATCH_SIZE = 8
+    # SRC_IMAGE_SIZE = (1056, 1056)
+    SRC_IMAGE_SIZE = (352, 352)
     MODEL_INPUT_IMAGE_SIZE = (352, 352)
 
     LR = 1.3e-3
     EPOCHS = 600
 
     MODEL_NAME_PREFIX = 'DenseNet201'
-    MODEL_NAME_POSTFIX = 'Test09_CondaLibsUpdated'
+    MODEL_NAME_POSTFIX = 'Test19_Standard_BigPatience12'
 
     AUGMENTATION_TRANSFORMS = albumentations.Compose([
         # albumentations.ShiftScaleRotate(
@@ -37,15 +39,12 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
         # albumentations.OpticalDistortion(p=0.5),
         # albumentations.RandomBrightnessContrast(p=0.2)
 
-
-
         albumentations.ShiftScaleRotate(
             border_mode=cv2.BORDER_CONSTANT, rotate_limit=20, shift_limit=0.15, scale_limit=0.2, p=1),
         albumentations.HorizontalFlip(p=0.5),
         albumentations.VerticalFlip(p=0.5),
         albumentations.RandomRotate90(p=1),
         ElasticSize(p=0.5),
-
 
         albumentations.OpticalDistortion(distort_limit=0.2, border_mode=cv2.BORDER_CONSTANT, p=0.5),
 
@@ -68,5 +67,14 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
 
 
         albumentations.GridDistortion(num_steps=4, distort_limit=0.15, border_mode=cv2.BORDER_CONSTANT, p=0.75),
+
+
+        # albumentations.OneOf([
+        #     albumentations.RandomSizedCrop(
+        #         min_max_height=(288, 416), height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1], p=0.8),
+        #     albumentations.RandomSizedCrop(
+        #         min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], SRC_IMAGE_SIZE[0]),
+        #         height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1], p=0.2),
+        # ], p=1),
 
     ], p=1.0)
