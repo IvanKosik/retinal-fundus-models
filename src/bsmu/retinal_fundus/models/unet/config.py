@@ -17,15 +17,15 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     PREPROCESS_BATCH_IMAGES = densenet.preprocess_input
 
     BATCH_SIZE = 8
-    # SRC_IMAGE_SIZE = (1056, 1056)
-    SRC_IMAGE_SIZE = (352, 352)
+    SRC_IMAGE_SIZE = (704, 704)
+    # SRC_IMAGE_SIZE = (352, 352)
     MODEL_INPUT_IMAGE_SIZE = (352, 352)
 
-    LR = 1.3e-3
+    LR = 5e-3
     EPOCHS = 600
 
     MODEL_NAME_PREFIX = 'DenseNet201'
-    MODEL_NAME_POSTFIX = 'Test19_Standard_BigPatience12'
+    MODEL_NAME_POSTFIX = 'Test41_CroppedInBegin_TiledValid'
 
     AUGMENTATION_TRANSFORMS = albumentations.Compose([
         # albumentations.ShiftScaleRotate(
@@ -38,6 +38,13 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
         # albumentations.IAASharpen(p=0.5),
         # albumentations.OpticalDistortion(p=0.5),
         # albumentations.RandomBrightnessContrast(p=0.2)
+
+
+        albumentations.RandomSizedCrop(
+            min_max_height=(352, SRC_IMAGE_SIZE[0]),
+            height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1],
+            interpolation=cv2.INTER_CUBIC, p=1),
+
 
         albumentations.ShiftScaleRotate(
             border_mode=cv2.BORDER_CONSTANT, rotate_limit=20, shift_limit=0.15, scale_limit=0.2, p=1),
@@ -71,10 +78,15 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
 
         # albumentations.OneOf([
         #     albumentations.RandomSizedCrop(
-        #         min_max_height=(288, 416), height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1], p=0.8),
+        #         min_max_height=(352, 416), height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1], p=0.8),
         #     albumentations.RandomSizedCrop(
         #         min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], SRC_IMAGE_SIZE[0]),
         #         height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1], p=0.2),
         # ], p=1),
+
+
+        # albumentations.RandomSizedCrop(
+        #     min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], SRC_IMAGE_SIZE[0]),
+        #     height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1], p=1),
 
     ], p=1.0)

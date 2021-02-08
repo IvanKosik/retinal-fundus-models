@@ -56,9 +56,9 @@ def main():
 
     # model_trainer.predict_using_generator(model_trainer.test_generator, 1)
 
-
     image = skimage.io.imread(str(r'D:\Projects\retinal-fundus-models\databases\HRF_all_GoodImages\images\15_h.jpg'))
-    predict_on_splitted_into_tiles(model_trainer, image, (3, 3))
+
+    # predict_on_splitted_into_tiles(model_trainer, image, (3, 3))
 
     # model_trainer.predict_on_images(images=[image], resize_mask_to_image=True, save=True)
 
@@ -74,7 +74,7 @@ def main():
     #     model_trainer.config.image_dir(), model_trainer.config.mask_dir(),
     #     model_trainer.config.train_data_csv_path(), model_trainer.config.valid_data_csv_path())
 
-    # model_trainer.run(find_lr=False)
+    model_trainer.run(find_lr=False)
 
 
 if __name__ == '__main__':

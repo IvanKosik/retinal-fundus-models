@@ -23,7 +23,7 @@ class ModelTrainerConfig:
 
     CLASSES_QTY: int = 1
 
-    LR: float = 1e-4  # 1.3e-3
+    LR: float = 5e-3  # 1.3e-3
     LOSS = sm_losses.bce_jaccard_loss
     EPOCHS: int = 150
 

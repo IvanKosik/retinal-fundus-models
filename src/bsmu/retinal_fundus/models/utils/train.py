@@ -24,63 +24,63 @@ class DataGenerator(keras.utils.Sequence):
         data = data_frame.to_numpy()
         self.sample_qty = len(data)
 
-        # if self.augmentation_transforms is None:
-        #     tile_grid_shape = (3, 3)
-        #     grid_tile_qty = tile_grid_shape[0] * tile_grid_shape[1]
-        #     self.sample_qty *= grid_tile_qty
-        #
-        #     self.images = np.empty(
-        #         shape=(self.sample_qty, *self.config.model_input_image_shape()), dtype=np.float32)
-        #     self.masks = np.empty(
-        #         shape=(self.sample_qty, *self.config.mask_shape()), dtype=np.float32)
-        #
-        #     for index, data_row in enumerate(data):
-        #         image_id = data_row[0]
-        #         print(f'#{index + 1}/{self.sample_qty} \timage_id: {image_id}')
-        #
-        #         image_path = self.config.image_dir() / image_id
-        #         image = skimage.io.imread(str(image_path))
-        #         image = skimage.transform.resize(
-        #             image, self.config.src_image_shape(), order=3, anti_aliasing=True)  # preserve_range=True)
-        #         image = image_utils.normalized_image(image).astype(np.float32)
-        #         image_tiles = image_utils.split_image_into_tiles(image, tile_grid_shape)
-        #         for tile_index, image_tile in enumerate(image_tiles):
-        #             image_tile = image_utils.normalized_image(image_tile).astype(np.float32)
-        #             self.images[index * grid_tile_qty + tile_index] = image_tile
-        #
-        #         mask_path = self.config.mask_dir() / image_id
-        #         mask = skimage.io.imread(str(mask_path))
-        #         mask = skimage.transform.resize(
-        #             mask, self.config.src_mask_shape(), order=3, anti_aliasing=True)  # preserve_range=True)
-        #         mask = image_utils.normalized_image(mask).astype(np.float32)
-        #         mask_tiles = image_utils.split_image_into_tiles(mask, tile_grid_shape)
-        #         for tile_index, mask_tile in enumerate(mask_tiles):
-        #             mask_tile = image_utils.normalized_image(mask_tile).astype(np.float32)
-        #             self.masks[index * grid_tile_qty + tile_index] = mask_tile
-        #
-        # else:
-        self.images = np.empty(
-            shape=(self.sample_qty, *self.config.src_image_shape()), dtype=np.float32)
-        self.masks = np.empty(
-            shape=(self.sample_qty, *self.config.src_mask_shape()), dtype=np.float32)
+        if self.augmentation_transforms is None:
+            tile_grid_shape = (2, 2)
+            grid_tile_qty = tile_grid_shape[0] * tile_grid_shape[1]
+            self.sample_qty *= grid_tile_qty
 
-        for index, data_row in enumerate(data):
-            image_id = data_row[0]
-            print(f'#{index + 1}/{self.sample_qty} \timage_id: {image_id}')
+            self.images = np.empty(
+                shape=(self.sample_qty, *self.config.model_input_image_shape()), dtype=np.float32)
+            self.masks = np.empty(
+                shape=(self.sample_qty, *self.config.mask_shape()), dtype=np.float32)
 
-            image_path = self.config.image_dir() / image_id
-            image = skimage.io.imread(str(image_path))
-            image = skimage.transform.resize(
-                image, self.images.shape[1:], order=3, anti_aliasing=True)  # preserve_range=True)
-            image = image_utils.normalized_image(image).astype(np.float32)
-            self.images[index] = image
+            for index, data_row in enumerate(data):
+                image_id = data_row[0]
+                print(f'#{index + 1}/{self.sample_qty} \timage_id: {image_id}')
 
-            mask_path = self.config.mask_dir() / image_id
-            mask = skimage.io.imread(str(mask_path))
-            mask = skimage.transform.resize(
-                mask, self.masks.shape[1:], order=3, anti_aliasing=True)  # preserve_range=True)
-            mask = image_utils.normalized_image(mask).astype(np.float32)
-            self.masks[index] = mask
+                image_path = self.config.image_dir() / image_id
+                image = skimage.io.imread(str(image_path))
+                image = skimage.transform.resize(
+                    image, self.config.src_image_shape(), order=3, anti_aliasing=True)  # preserve_range=True)
+                image = image_utils.normalized_image(image).astype(np.float32)
+                image_tiles = image_utils.split_image_into_tiles(image, tile_grid_shape)
+                for tile_index, image_tile in enumerate(image_tiles):
+                    image_tile = image_utils.normalized_image(image_tile).astype(np.float32)
+                    self.images[index * grid_tile_qty + tile_index] = image_tile
+
+                mask_path = self.config.mask_dir() / image_id
+                mask = skimage.io.imread(str(mask_path))
+                mask = skimage.transform.resize(
+                    mask, self.config.src_mask_shape(), order=3, anti_aliasing=True)  # preserve_range=True)
+                mask = image_utils.normalized_image(mask).astype(np.float32)
+                mask_tiles = image_utils.split_image_into_tiles(mask, tile_grid_shape)
+                for tile_index, mask_tile in enumerate(mask_tiles):
+                    mask_tile = image_utils.normalized_image(mask_tile).astype(np.float32)
+                    self.masks[index * grid_tile_qty + tile_index] = mask_tile
+
+        else:
+            self.images = np.empty(
+                shape=(self.sample_qty, *self.config.src_image_shape()), dtype=np.float32)
+            self.masks = np.empty(
+                shape=(self.sample_qty, *self.config.src_mask_shape()), dtype=np.float32)
+
+            for index, data_row in enumerate(data):
+                image_id = data_row[0]
+                print(f'#{index + 1}/{self.sample_qty} \timage_id: {image_id}')
+
+                image_path = self.config.image_dir() / image_id
+                image = skimage.io.imread(str(image_path))
+                image = skimage.transform.resize(
+                    image, self.images.shape[1:], order=3, anti_aliasing=True)  # preserve_range=True)
+                image = image_utils.normalized_image(image).astype(np.float32)
+                self.images[index] = image
+
+                mask_path = self.config.mask_dir() / image_id
+                mask = skimage.io.imread(str(mask_path))
+                mask = skimage.transform.resize(
+                    mask, self.masks.shape[1:], order=3, anti_aliasing=True)  # preserve_range=True)
+                mask = image_utils.normalized_image(mask).astype(np.float32)
+                self.masks[index] = mask
 
         debug_utils.print_info(self.images, 'images')
         debug_utils.print_info(self.masks, 'masks')
