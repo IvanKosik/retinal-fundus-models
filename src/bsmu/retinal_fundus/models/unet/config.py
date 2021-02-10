@@ -25,7 +25,7 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     EPOCHS = 600
 
     MODEL_NAME_PREFIX = 'DenseNet201'
-    MODEL_NAME_POSTFIX = 'Test41_CroppedInBegin_TiledValid'
+    MODEL_NAME_POSTFIX = 'Test46_FullAndTiled2x2TrainValid'
 
     AUGMENTATION_TRANSFORMS = albumentations.Compose([
         # albumentations.ShiftScaleRotate(
@@ -40,10 +40,10 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
         # albumentations.RandomBrightnessContrast(p=0.2)
 
 
-        albumentations.RandomSizedCrop(
-            min_max_height=(352, SRC_IMAGE_SIZE[0]),
-            height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1],
-            interpolation=cv2.INTER_CUBIC, p=1),
+        # albumentations.RandomSizedCrop(
+        #     min_max_height=(352, SRC_IMAGE_SIZE[0]),
+        #     height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1],
+        #     interpolation=cv2.INTER_CUBIC, p=1),
 
 
         albumentations.ShiftScaleRotate(
