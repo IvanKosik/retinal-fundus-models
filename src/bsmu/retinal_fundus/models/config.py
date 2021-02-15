@@ -16,6 +16,9 @@ class ModelTrainerConfig:
     BACKBONE: str = ''
     PREPROCESS_BATCH_IMAGES: typing.Callable = None
 
+    TRAIN_TILE_GRID_SHAPE = None
+    VALID_TILE_GRID_SHAPE = None
+
     BATCH_SIZE: int = 16
     SRC_IMAGE_SIZE: tuple = (1056, 1056)
     MODEL_INPUT_IMAGE_SIZE: tuple = (500, 500)
@@ -148,13 +151,13 @@ class ModelTrainerConfig:
     @classmethod
     def reduce_lr_callback(cls):
         return keras.callbacks.ReduceLROnPlateau(
-            monitor=cls.MONITORED_QUANTITY_NAME, factor=0.8, patience=12, verbose=1,
+            monitor=cls.MONITORED_QUANTITY_NAME, factor=0.8, patience=20, verbose=1,
             mode=cls.MONITORED_QUANTITY_MODE, min_lr=1e-6)
 
     @classmethod
     def early_stopping_callback(cls):
         return keras.callbacks.EarlyStopping(
-            monitor=cls.MONITORED_QUANTITY_NAME, patience=60, mode=cls.MONITORED_QUANTITY_MODE)
+            monitor=cls.MONITORED_QUANTITY_NAME, patience=200, mode=cls.MONITORED_QUANTITY_MODE)
 
     @classmethod
     def tensorboard_callback(cls):

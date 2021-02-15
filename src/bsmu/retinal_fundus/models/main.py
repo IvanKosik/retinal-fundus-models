@@ -56,9 +56,9 @@ def main():
 
     # model_trainer.predict_using_generator(model_trainer.test_generator, 1)
 
-    image = skimage.io.imread(str(r'D:\Projects\retinal-fundus-models\databases\HRF_all_GoodImages\images\15_h.jpg'))
+    # image = skimage.io.imread(str(r'D:\Projects\retinal-fundus-models\databases\HRF_all_GoodImages\images\15_h.jpg'))
 
-    # predict_on_splitted_into_tiles(model_trainer, image, (3, 3))
+    # predict_on_splitted_into_tiles(model_trainer, image, (4, 4))
 
     # model_trainer.predict_on_images(images=[image], resize_mask_to_image=True, save=True)
 
@@ -68,7 +68,7 @@ def main():
     # model_trainer.save_predictions([mask], prefix='combined_mask')
 
 
-    # model_trainer.verify_generator(model_trainer.train_generator, show=True)
+    # model_trainer.verify_generator(model_trainer.valid_generator, show=True)
 
     # csv_utils.generate_train_valid_csv(
     #     model_trainer.config.image_dir(), model_trainer.config.mask_dir(),

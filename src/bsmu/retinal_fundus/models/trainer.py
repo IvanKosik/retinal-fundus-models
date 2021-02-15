@@ -97,7 +97,8 @@ class ModelTrainer:
     def _create_train_generator(self):
         self._train_generator = train_utils.DataGenerator(
             config=self.config, data_csv_path=self.config.train_data_csv_path(), shuffle=True,
-            augmentation_transforms=self.config.AUGMENTATION_TRANSFORMS)
+            augmentation_transforms=self.config.AUGMENTATION_TRANSFORMS,
+            tile_grid_shape=self.config.TRAIN_TILE_GRID_SHAPE)
 
     @property
     def valid_generator(self):
@@ -108,7 +109,7 @@ class ModelTrainer:
     def _create_valid_generator(self):
         self._valid_generator = train_utils.DataGenerator(
             config=self.config, data_csv_path=self.config.valid_data_csv_path(), shuffle=False,
-            augmentation_transforms=None)
+            augmentation_transforms=None, tile_grid_shape=self.config.VALID_TILE_GRID_SHAPE)
 
     @property
     def test_generator(self):

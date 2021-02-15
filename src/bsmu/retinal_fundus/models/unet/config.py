@@ -16,16 +16,19 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     BACKBONE = 'densenet201'
     PREPROCESS_BATCH_IMAGES = densenet.preprocess_input
 
+    TRAIN_TILE_GRID_SHAPE = None
+    VALID_TILE_GRID_SHAPE = None
+
     BATCH_SIZE = 8
-    SRC_IMAGE_SIZE = (704, 704)
-    # SRC_IMAGE_SIZE = (352, 352)
+    # SRC_IMAGE_SIZE = (704, 704)
+    SRC_IMAGE_SIZE = (352, 352)
     MODEL_INPUT_IMAGE_SIZE = (352, 352)
 
     LR = 5e-3
-    EPOCHS = 600
+    EPOCHS = 700
 
     MODEL_NAME_PREFIX = 'DenseNet201'
-    MODEL_NAME_POSTFIX = 'Test46_FullAndTiled2x2TrainValid'
+    MODEL_NAME_POSTFIX = 'Test52_FullStandard'
 
     AUGMENTATION_TRANSFORMS = albumentations.Compose([
         # albumentations.ShiftScaleRotate(
@@ -40,11 +43,16 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
         # albumentations.RandomBrightnessContrast(p=0.2)
 
 
-        # albumentations.RandomSizedCrop(
-        #     min_max_height=(352, SRC_IMAGE_SIZE[0]),
-        #     height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1],
-        #     interpolation=cv2.INTER_CUBIC, p=1),
-
+        # albumentations.OneOf([
+        #     albumentations.RandomSizedCrop(
+        #         min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], MODEL_INPUT_IMAGE_SIZE[0]),
+        #         height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1],
+        #         interpolation=cv2.INTER_CUBIC, p=0.8),
+        #     albumentations.RandomSizedCrop(
+        #         min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], SRC_IMAGE_SIZE[0]),
+        #         height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1],
+        #         interpolation=cv2.INTER_CUBIC, p=0.2),
+        # ], p=1),
 
         albumentations.ShiftScaleRotate(
             border_mode=cv2.BORDER_CONSTANT, rotate_limit=20, shift_limit=0.15, scale_limit=0.2, p=1),
@@ -72,21 +80,6 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
             albumentations.MedianBlur(blur_limit=3, p=1),
         ], p=0.15),
 
-
         albumentations.GridDistortion(num_steps=4, distort_limit=0.15, border_mode=cv2.BORDER_CONSTANT, p=0.75),
-
-
-        # albumentations.OneOf([
-        #     albumentations.RandomSizedCrop(
-        #         min_max_height=(352, 416), height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1], p=0.8),
-        #     albumentations.RandomSizedCrop(
-        #         min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], SRC_IMAGE_SIZE[0]),
-        #         height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1], p=0.2),
-        # ], p=1),
-
-
-        # albumentations.RandomSizedCrop(
-        #     min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], SRC_IMAGE_SIZE[0]),
-        #     height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1], p=1),
 
     ], p=1.0)
