@@ -1,5 +1,6 @@
 /data/images
 /data/masks
+/data/fundus
 /databases
 /output
 /temp

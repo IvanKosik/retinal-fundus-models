@@ -16,7 +16,7 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     BACKBONE = 'densenet201'
     PREPROCESS_BATCH_IMAGES = densenet.preprocess_input
 
-    TRAIN_TILE_GRID_SHAPE = None
+    # TRAIN_TILE_GRID_SHAPE = (2, 2)
     VALID_TILE_GRID_SHAPE = None
 
     BATCH_SIZE = 8
@@ -28,7 +28,7 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     EPOCHS = 700
 
     MODEL_NAME_PREFIX = 'DenseNet201'
-    MODEL_NAME_POSTFIX = 'Test52_FullStandard'
+    MODEL_NAME_POSTFIX = 'Test56_FullStandard_ColorJitter_MoreImages'
 
     AUGMENTATION_TRANSFORMS = albumentations.Compose([
         # albumentations.ShiftScaleRotate(
@@ -42,6 +42,9 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
         # albumentations.OpticalDistortion(p=0.5),
         # albumentations.RandomBrightnessContrast(p=0.2)
 
+        # albumentations.RandomRain(rain_type='drizzle', drop_width=3, blur_value=1, brightness_coefficient=1, p=0.25),
+
+        albumentations.ColorJitter(brightness=0, contrast=0, hue=0.05, p=0.5),
 
         # albumentations.OneOf([
         #     albumentations.RandomSizedCrop(
