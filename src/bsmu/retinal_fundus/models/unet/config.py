@@ -13,22 +13,24 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     DATA_DIR = Path(r'C:\MyDiskBackup\Projects\retinal-fundus-models\data')
 
     MODEL_ARCHITECTURE = Unet
-    BACKBONE = 'densenet201'
+    BACKBONE = 'inceptionv3'
     PREPROCESS_BATCH_IMAGES = densenet.preprocess_input
 
     # TRAIN_TILE_GRID_SHAPE = (2, 2)
-    VALID_TILE_GRID_SHAPE = None
+    VALID_TILE_GRID_SHAPE = (2, 2)
 
     BATCH_SIZE = 8
-    # SRC_IMAGE_SIZE = (704, 704)
-    SRC_IMAGE_SIZE = (352, 352)
+    SRC_IMAGE_SIZE = (704, 704)
+    # SRC_IMAGE_SIZE = (352, 352)
     MODEL_INPUT_IMAGE_SIZE = (352, 352)
 
     LR = 5e-3
     EPOCHS = 700
 
-    MODEL_NAME_PREFIX = 'DenseNet201'
-    MODEL_NAME_POSTFIX = 'Test56_FullStandard_ColorJitter_MoreImages'
+    MODEL_NAME_PREFIX = 'InceptionV3'
+    MODEL_NAME_POSTFIX = 'Test64_Cropped_TiledValid_PartData'
+
+    CSV_TITLE = 'all'  # 'part'
 
     AUGMENTATION_TRANSFORMS = albumentations.Compose([
         # albumentations.ShiftScaleRotate(
@@ -46,16 +48,16 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
 
         albumentations.ColorJitter(brightness=0, contrast=0, hue=0.05, p=0.5),
 
-        # albumentations.OneOf([
-        #     albumentations.RandomSizedCrop(
-        #         min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], MODEL_INPUT_IMAGE_SIZE[0]),
-        #         height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1],
-        #         interpolation=cv2.INTER_CUBIC, p=0.8),
-        #     albumentations.RandomSizedCrop(
-        #         min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], SRC_IMAGE_SIZE[0]),
-        #         height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1],
-        #         interpolation=cv2.INTER_CUBIC, p=0.2),
-        # ], p=1),
+        albumentations.OneOf([
+            albumentations.RandomSizedCrop(
+                min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], MODEL_INPUT_IMAGE_SIZE[0]),
+                height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1],
+                interpolation=cv2.INTER_CUBIC, p=0.8),
+            albumentations.RandomSizedCrop(
+                min_max_height=(MODEL_INPUT_IMAGE_SIZE[0], SRC_IMAGE_SIZE[0]),
+                height=MODEL_INPUT_IMAGE_SIZE[0], width=MODEL_INPUT_IMAGE_SIZE[1],
+                interpolation=cv2.INTER_CUBIC, p=0.2),
+        ], p=1),
 
         albumentations.ShiftScaleRotate(
             border_mode=cv2.BORDER_CONSTANT, rotate_limit=20, shift_limit=0.15, scale_limit=0.2, p=1),

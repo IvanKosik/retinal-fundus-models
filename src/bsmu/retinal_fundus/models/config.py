@@ -39,6 +39,7 @@ class ModelTrainerConfig:
 
     AUGMENTATION_TRANSFORMS = None
 
+    CSV_TITLE = 'all'
     TRAIN_CSV_NAME = 'train.csv'
     VALID_CSV_NAME = 'valid.csv'
     TEST_CSV_NAME = 'test.csv'
@@ -115,32 +116,20 @@ class ModelTrainerConfig:
         return cls.DATA_DIR / 'csv'
 
     @classmethod
-    def all_images_csv_dir(cls):
-        return cls.csv_dir() / 'all'
+    def images_csv_dir(cls):
+        return cls.csv_dir() / cls.CSV_TITLE
 
     @classmethod
     def train_data_csv_path(cls):
-        return cls.all_images_csv_dir() / cls.TRAIN_CSV_NAME
+        return cls.images_csv_dir() / cls.TRAIN_CSV_NAME
 
     @classmethod
     def valid_data_csv_path(cls):
-        return cls.all_images_csv_dir() / cls.VALID_CSV_NAME
+        return cls.images_csv_dir() / cls.VALID_CSV_NAME
 
     @classmethod
     def test_data_csv_path(cls):
-        return cls.all_images_csv_dir() / cls.TEST_CSV_NAME
-
-    @classmethod
-    def part_images_csv_dir(cls):
-        return cls.csv_dir() / 'part'
-
-    @classmethod
-    def part_train_data_csv_path(cls):
-        return cls.part_images_csv_dir() / cls.TRAIN_CSV_NAME
-
-    @classmethod
-    def part_valid_data_csv_path(cls):
-        return cls.part_images_csv_dir() / cls.VALID_CSV_NAME
+        return cls.images_csv_dir() / cls.TEST_CSV_NAME
 
     @classmethod
     def checkpoint_callback(cls):
