@@ -77,7 +77,11 @@ def start_end_nonzero_indexes(mask):
     return mask.argmax(), mask.shape[0] - mask[::-1].argmax()
 
 
-def split_image_into_tiles(image, tile_grid_shape: tuple = (2, 2)) -> list:
+def split_image_into_tiles(image, tile_grid_shape: tuple = (2, 2), border_size: int = 10) -> list:
+    border_axis_qty = 2
+    bordered_image = np.pad(
+        image, pad_width=((border_size, border_size),) * border_axis_qty + ((0, 0),) * (image.shape[2] - border_axis_qty))
+
     tile_grid_row_qty = tile_grid_shape[0]
     tile_grid_col_qty = tile_grid_shape[1]
     row_tile_size = int(round(image.shape[0] / tile_grid_row_qty))
@@ -85,12 +89,16 @@ def split_image_into_tiles(image, tile_grid_shape: tuple = (2, 2)) -> list:
 
     tiles = []
     tile_row_begin = 0
+    borders_size = 2 * border_size
     for row in range(tile_grid_row_qty):
         tile_row_end = image.shape[0] if row == tile_grid_row_qty - 1 else tile_row_begin + row_tile_size
         tile_col_begin = 0
         for col in range(tile_grid_col_qty):
             tile_col_end = image.shape[1] if col == tile_grid_col_qty - 1 else tile_col_begin + col_tile_size
-            tile = image[tile_row_begin:tile_row_end, tile_col_begin:tile_col_end, ...]
+            tile = bordered_image[
+                   tile_row_begin:tile_row_end + borders_size,
+                   tile_col_begin:tile_col_end + borders_size,
+                   ...]
             tiles.append(tile)
 
             tile_col_begin = tile_col_end
@@ -100,7 +108,7 @@ def split_image_into_tiles(image, tile_grid_shape: tuple = (2, 2)) -> list:
     return tiles
 
 
-def merge_tiles_into_image(tiles, tile_grid_shape: tuple):
+def merge_tiles_into_image(tiles, tile_grid_shape: tuple, border_size: int = 10):
     tile_grid_row_qty = tile_grid_shape[0]
     tile_grid_col_qty = tile_grid_shape[1]
 
@@ -108,7 +116,11 @@ def merge_tiles_into_image(tiles, tile_grid_shape: tuple):
     row_begin_tile_index = 0
     for row in range(tile_grid_row_qty):
         row_end_tile_index = row_begin_tile_index + tile_grid_col_qty
-        merged_row_tile = np.concatenate(tiles[row_begin_tile_index:row_end_tile_index], axis=1)
+        merged_row_tile = np.concatenate(
+            tiles[row_begin_tile_index:row_end_tile_index,
+                  border_size:tiles.shape[1]-border_size,
+                  border_size:tiles.shape[2]-border_size],
+            axis=1)
         rows.append(merged_row_tile)
 
         row_begin_tile_index = row_end_tile_index

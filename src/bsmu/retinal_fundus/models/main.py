@@ -12,23 +12,26 @@ from bsmu.retinal_fundus.models.utils import image as image_utils
 import skimage.io
 
 
-def predict_on_splitted_into_tiles(model_trainer: ModelTrainer, image, tile_grid_shape: tuple = (3, 3)):
+def predict_on_splitted_into_tiles(
+        model_trainer: ModelTrainer, image, tile_grid_shape: tuple = (3, 3), border_size: int = 10):
     model_input_image_shape = model_trainer.config.model_input_image_shape()
-    model_input_image_shape_multiplied_by_tile_shape = (model_input_image_shape[0] * tile_grid_shape[0],
-                                                        model_input_image_shape[1] * tile_grid_shape[1],
-                                                        model_input_image_shape[2])
+    borders_size = 2 * border_size
+    model_input_image_shape_multiplied_by_tile_shape = (
+        (model_input_image_shape[0] - borders_size) * tile_grid_shape[0],
+        (model_input_image_shape[1] - borders_size) * tile_grid_shape[1],
+        model_input_image_shape[2])
     src_image_shape = image.shape
     print('model_input_image_shape_multiplied_by_tile_shape', model_input_image_shape_multiplied_by_tile_shape)
     # Resize image to |model_input_image_shape_multiplied_by_tile_shape|
     image = skimage.transform.resize(
         image, model_input_image_shape_multiplied_by_tile_shape, order=3, anti_aliasing=True)
     # Split image into tiles
-    image_tiles = image_utils.split_image_into_tiles(image, tile_grid_shape)
+    image_tiles = image_utils.split_image_into_tiles(image, tile_grid_shape, border_size=border_size)
     # Get predictions for tiles without image and mask resize
     tile_masks = model_trainer.predict_on_images(images=image_tiles, resize_images_to_model_input_shape=False,
                                                  resize_mask_to_image=False, save=True)
     # Merge tiles
-    mask = image_utils.merge_tiles_into_image(tile_masks, tile_grid_shape)
+    mask = image_utils.merge_tiles_into_image(tile_masks, tile_grid_shape, border_size=border_size)
     # Resize resulted mask to image size
     mask = skimage.transform.resize(mask, src_image_shape[:2], order=3, anti_aliasing=True)
     model_trainer.save_predictions([mask], prefix='combined_mask')
@@ -57,9 +60,9 @@ def main():
     # model_trainer.predict_using_generator(model_trainer.test_generator, 1)
 
     # image = skimage.io.imread(str(r'D:\Projects\retinal-fundus-models\databases\NoMasks_OnlyForVisualTesting\goodQuality\test_03.JPG'))
-    # image = skimage.io.imread(str(r'D:\Projects\retinal-fundus-models\databases\OUR_IMAGES\TestImage.jpg'))
-    #
-    # predict_on_splitted_into_tiles(model_trainer, image, (3, 3))
+    image = skimage.io.imread(str(r'D:\Projects\retinal-fundus-models\databases\OUR_IMAGES\TestImage.jpg'))
+
+    predict_on_splitted_into_tiles(model_trainer, image, (3, 3), border_size=10)
 
     # model_trainer.predict_on_images(images=[image], resize_mask_to_image=True, save=True)
 
@@ -69,7 +72,7 @@ def main():
     # model_trainer.save_predictions([mask], prefix='combined_mask')
 
 
-    model_trainer.verify_generator(model_trainer.train_generator, show=True)
+    # model_trainer.verify_generator(model_trainer.train_generator, show=True)
 
     # csv_utils.generate_train_valid_csv(
     #     model_trainer.config.image_dir(), model_trainer.config.mask_dir(),
