@@ -3,12 +3,13 @@ from __future__ import annotations
 from bsmu.retinal_fundus.models.unet import trainer
 from bsmu.retinal_fundus.models.utils import csv as csv_utils
 from pathlib import Path
-# import skimage.io
 import skimage.transform
-# import numpy as np
+import numpy as np
 from bsmu.retinal_fundus.models.utils import view as view_utils
 from bsmu.retinal_fundus.models.utils import debug as debug_utils
 from bsmu.retinal_fundus.models.utils import image as image_utils
+from bsmu.retinal_fundus.models.utils import train as train_utils
+from bsmu.retinal_fundus.models import temp
 import skimage.io
 
 
@@ -58,6 +59,9 @@ def main():
 
     model_trainer = trainer.UnetModelTrainer()
 
+    # temp.test_interpolation_quality_during_augmentations(model_trainer)
+
+
     # model_trainer.predict_using_generator(model_trainer.test_generator, 1)
 
     # image = skimage.io.imread(str(r'D:\Projects\retinal-fundus-models\databases\NoMasks_OnlyForVisualTesting\goodQuality\test_03.JPG'))
@@ -84,19 +88,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-def create_test_data_with_zeros_masks():
-    for image_path in Path(r'D:\Projects\retinal-fundus-models\databases\NoMasks_OnlyForVisualTesting\goodQuality').iterdir():
-        if image_path.is_dir():
-            continue
-
-        image = skimage.io.imread(str(image_path))
-        image = skimage.transform.resize(
-            image, (image.shape[0] // 5, image.shape[1] // 5, image.shape[2]), order=3, anti_aliasing=True)
-        skimage.io.imsave(str(Path(r'D:\Projects\retinal-fundus-models\databases\NoMasks_OnlyForVisualTesting\goodQuality\png') / f'{image_path.stem}.png'), image)
-
-        empty_mask = np.zeros_like(image)
-        skimage.io.imsave(str(Path(
-            r'D:\Projects\retinal-fundus-models\databases\NoMasks_OnlyForVisualTesting\goodQuality\empty_masks') / f'{image_path.stem}.png'),
-                          empty_mask)

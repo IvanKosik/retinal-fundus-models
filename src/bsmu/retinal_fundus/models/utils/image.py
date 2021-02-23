@@ -77,10 +77,11 @@ def start_end_nonzero_indexes(mask):
     return mask.argmax(), mask.shape[0] - mask[::-1].argmax()
 
 
-def split_image_into_tiles(image, tile_grid_shape: tuple = (2, 2), border_size: int = 10) -> list:
+def split_image_into_tiles(image, tile_grid_shape: tuple = (2, 2), border_size: int = 0) -> list:
     border_axis_qty = 2
-    bordered_image = np.pad(
-        image, pad_width=((border_size, border_size),) * border_axis_qty + ((0, 0),) * (image.shape[2] - border_axis_qty))
+    border_pad_width = ((border_size, border_size),) * border_axis_qty \
+                       + ((0, 0),) * (len(image.shape) - border_axis_qty)
+    bordered_image = np.pad(image, pad_width=border_pad_width)
 
     tile_grid_row_qty = tile_grid_shape[0]
     tile_grid_col_qty = tile_grid_shape[1]
@@ -108,7 +109,7 @@ def split_image_into_tiles(image, tile_grid_shape: tuple = (2, 2), border_size: 
     return tiles
 
 
-def merge_tiles_into_image(tiles, tile_grid_shape: tuple, border_size: int = 10):
+def merge_tiles_into_image(tiles, tile_grid_shape: tuple, border_size: int = 0):
     tile_grid_row_qty = tile_grid_shape[0]
     tile_grid_col_qty = tile_grid_shape[1]
 
@@ -128,7 +129,7 @@ def merge_tiles_into_image(tiles, tile_grid_shape: tuple, border_size: int = 10)
     return np.concatenate(rows, axis=0)
 
 
-def merge_tiles_into_image_with_blending(tiles, tile_grid_shape: tuple, border_size: int = 10):
+def merge_tiles_into_image_with_blending(tiles, tile_grid_shape: tuple, border_size: int = 0):
     removed_border_size = int(border_size / 2)
     blended_border_size = border_size - removed_border_size
 

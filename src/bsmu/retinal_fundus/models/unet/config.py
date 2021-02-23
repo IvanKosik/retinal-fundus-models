@@ -5,7 +5,8 @@ import cv2
 from keras.applications import densenet
 from segmentation_models import Unet
 
-from bsmu.retinal_fundus.models.augmentations import ElasticSize
+from bsmu.retinal_fundus.models.augmentations import \
+    ElasticSize, ShiftScaleRotateLinearMask, OpticalDistortionLinearMask, GridDistortionLinearMask
 from bsmu.retinal_fundus.models.config import ModelTrainerConfig
 
 
@@ -27,8 +28,8 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     LR = 5e-3
     EPOCHS = 700
 
-    MODEL_NAME_PREFIX = 'InceptionV3'
-    MODEL_NAME_POSTFIX = 'Test64_Cropped_TiledValid_PartData'
+    MODEL_NAME_PREFIX = '067_InceptionV3'
+    MODEL_NAME_POSTFIX = 'Cropped_TiledValid_RoundMask'
 
     CSV_TITLE = 'all'  # 'part'
 
@@ -59,14 +60,18 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
                 interpolation=cv2.INTER_CUBIC, p=0.2),
         ], p=1),
 
+        #ShiftScaleRotateLinearMask(
         albumentations.ShiftScaleRotate(
+            interpolation=cv2.INTER_CUBIC,
             border_mode=cv2.BORDER_CONSTANT, rotate_limit=20, shift_limit=0.15, scale_limit=0.2, p=1),
         albumentations.HorizontalFlip(p=0.5),
         albumentations.VerticalFlip(p=0.5),
         albumentations.RandomRotate90(p=1),
         ElasticSize(p=0.5),
 
-        albumentations.OpticalDistortion(distort_limit=0.2, border_mode=cv2.BORDER_CONSTANT, p=0.5),
+        #OpticalDistortionLinearMask(
+        albumentations.OpticalDistortion(
+            distort_limit=0.2, border_mode=cv2.BORDER_CONSTANT, p=0.5),
 
         albumentations.RandomBrightnessContrast(brightness_limit=0.15, contrast_limit=0.25, p=1),
         albumentations.RandomGamma(p=1),
@@ -85,6 +90,8 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
             albumentations.MedianBlur(blur_limit=3, p=1),
         ], p=0.15),
 
-        albumentations.GridDistortion(num_steps=4, distort_limit=0.15, border_mode=cv2.BORDER_CONSTANT, p=0.75),
+        #GridDistortionLinearMask(
+        albumentations.GridDistortion(
+            num_steps=4, distort_limit=0.15, border_mode=cv2.BORDER_CONSTANT, p=0.75),
 
     ], p=1.0)

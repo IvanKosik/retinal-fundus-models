@@ -133,6 +133,8 @@ class DataGenerator(keras.utils.Sequence):
                 image = image_utils.normalized_image(image)
                 mask = image_utils.normalized_image(mask)
 
+            mask = np.round(mask)
+
             image = image * 255
             batch_images[item_number, ...] = image
 
