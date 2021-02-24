@@ -133,6 +133,8 @@ class DataGenerator(keras.utils.Sequence):
                 image = image_utils.normalized_image(image)
                 mask = image_utils.normalized_image(mask)
 
+            # Threshold mask pixels at 0.5 to have GT masks be 0 or 1 to use with
+            # binary cross entropy loss.
             mask = np.round(mask)
 
             image = image * 255

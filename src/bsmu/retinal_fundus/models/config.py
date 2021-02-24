@@ -34,6 +34,7 @@ class ModelTrainerConfig:
     MONITORED_QUANTITY_NAME = 'val_' + sm_metrics.iou_score.name
     MONITORED_QUANTITY_MODE = 'max'
 
+    MODEL_NUMBER: int = 0
     MODEL_NAME_PREFIX = ''
     MODEL_NAME_POSTFIX = ''
 
@@ -49,9 +50,10 @@ class ModelTrainerConfig:
 
     @classmethod
     def model_name(cls):
+        number_str = str(cls.MODEL_NUMBER).zfill(3)
         size = f'{cls.MODEL_INPUT_IMAGE_SIZE[0]}x{cls.MODEL_INPUT_IMAGE_SIZE[1]}'
         batch_size = f'b{cls.BATCH_SIZE}'
-        name_parts = [cls.MODEL_NAME_PREFIX, size, batch_size, cls.MODEL_NAME_POSTFIX]
+        name_parts = [number_str, cls.CSV_TITLE, cls.MODEL_NAME_PREFIX, size, batch_size, cls.MODEL_NAME_POSTFIX]
         name = '_'.join(filter(None, name_parts))
         return f'{name}.h5'
 
