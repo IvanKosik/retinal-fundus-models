@@ -28,11 +28,11 @@ class UnetModelTrainerConfig(ModelTrainerConfig):
     LR = 5e-3
     EPOCHS = 700
 
-    MODEL_NUMBER = 73
+    MODEL_NUMBER = 75
     MODEL_NAME_PREFIX = 'InceptionV3'
     MODEL_NAME_POSTFIX = 'Cropped_TiledValid_RoundMask'
 
-    CSV_TITLE = 'chasedb-drive-hrf'
+    CSV_TITLE = 'chasedb-drive-stare-hrf'
 
     AUGMENTATION_TRANSFORMS = albumentations.Compose([
         # albumentations.ShiftScaleRotate(
